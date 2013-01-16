@@ -30,12 +30,26 @@ def readfile(file)
   puts "#{counter} incidents"
   return incidents
 end
+
+def refine(incidents)
+  refine = Array.new()
+  grabber = Hash.new()
+  
+  incidents.each{|incident|
+    pp incident
+    incident.scan(/Primary Rd?(.*)\n/){|w| grabber['Primary Rd'] = w[0].strip}
+    incident.scan(/Secondary Rd(.*)\n/){|w| grabber['Secondary Rd'] = w[0].strip}
+    incident.scan(/Collision Date(.*)\n/){|w| grabber['Collision Date'] = w[0].strip}
+    pp grabber
+  }
+end
  
 def main()
   incidents = Array.new()
+  refined = Array.new()
   incidents = readfile('labikemap2011.txt')
-  pp incidents
-  puts incidents.count
+  refined = refine(incidents)
+  puts refined.count
 end
 
 main()
