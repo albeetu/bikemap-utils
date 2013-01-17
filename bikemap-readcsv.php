@@ -35,9 +35,13 @@ function readHeader($header){
 }
 
 function geocode($street, $crossstreet, $offset){
-
-
-  return $coords
+  $intersection = $street." / ".$crosstreet.", Los Angeles, CA";
+  $url = "http://dev.dma.ucla.edu/~mpeteu/bikemap/geocode-api.php?loc=".$intersection;
+  $geo_return = file_get_contents($url);
+  $coords = explode(",", $geo_return);
+  print geo_return;
+  break;
+  return $coords;
 }
 
 function readRecord($list,$contents){
@@ -90,5 +94,7 @@ function main(){
  //print json_encode($records);
 }
 
-main()
+//main()
+$coords = geocode("Wilshire","Western","0");
+print_r $coords
 ?>
