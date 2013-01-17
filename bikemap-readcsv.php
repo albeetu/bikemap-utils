@@ -34,6 +34,12 @@ function readHeader($header){
   
 }
 
+function geocode($street, $crossstreet, $offset){
+
+
+  return $coords
+}
+
 function readRecord($list,$contents){
   
   $records = Array(); 
@@ -50,6 +56,7 @@ function readRecord($list,$contents){
     $records[$record_count] = $data_record;
     $record_count++;
   } 
+  // geocode here?
   return $records;
 }
 
@@ -68,6 +75,7 @@ function getNecessary($list,$contents){
     $records[$record_count] = $data_record;
     $record_count++;
   }
+  // geocode here?
   return $records;
 
 }
