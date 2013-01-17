@@ -39,8 +39,6 @@ function geocode($street, $crossstreet, $offset){
   $url = "http://dev.dma.ucla.edu/~mpeteu/bikemap/geocode-api.php?loc=".$intersection;
   $geo_return = file_get_contents($url);
   $coords = explode(",", $geo_return);
-  print geo_return;
-  break;
   return $coords;
 }
 
@@ -76,10 +74,12 @@ function getNecessary($list,$contents){
     {
         $data_record[$list[$index]] = trim($record[$index],'"\n');
     }
+    $coords = geocode($data_record["primary_rd"],$data_record["secondary_rd"],0);
+    $data_record["long"] = $coords[0];
+    $data_record["lat"] = $coords[1];
     $records[$record_count] = $data_record;
     $record_count++;
   }
-  // geocode here?
   return $records;
 
 }
@@ -94,7 +94,5 @@ function main(){
  //print json_encode($records);
 }
 
-//main()
-$coords = geocode("Wilshire","Western","0");
-print_r $coords
+main()
 ?>
