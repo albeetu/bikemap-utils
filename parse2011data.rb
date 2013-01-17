@@ -5,11 +5,23 @@
 # parse out data from each array segment
 # export to csv
 #
-# Data segments
+# Data segments (Must haves)
 # "Primary Rd" 
 # "Secondary Rd"
 # "Collision Date"
+# "Collision Time"
 # "Collision Type"
+# "CaseID"
+# "Distance"
+# "Direction"
+# "Weather1"
+# "Collision_Severity"
+# "Number_Killed"
+# "Number_Injured"
+
+
+
+
 
 require 'rubygems'
 require 'pp'
@@ -34,7 +46,6 @@ end
 def refine(incidents)
   refine = Array.new()
   grabber = Hash.new()
-  
   incidents.each{|incident|
     pp incident
     incident.scan(/Primary Rd?(.*)\n/){|w| grabber['Primary Rd'] = w[0].strip}
@@ -43,6 +54,7 @@ def refine(incidents)
     pp grabber
   }
 end
+
  
 def main()
   incidents = Array.new()
