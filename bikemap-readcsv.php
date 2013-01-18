@@ -87,9 +87,9 @@ function getNecessary($list,$contents,$limit){
   }
   else
   {
-    $records_needed = count($contents);
+    $records_needed = count($contents) - 1;
   }
-  for ($i=1; $i<$records_needed; $i++)
+  for ($i=1; $i<=$records_needed; $i++)
   {
     $record = explode(',',$contents[$i]);
     foreach($selection as $index)
