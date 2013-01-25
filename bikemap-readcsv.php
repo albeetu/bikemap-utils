@@ -170,25 +170,32 @@ function print_to_file($records)
 }
 
 function main(){
+ $necessary = Array();
+ $files = Array("CollisionRecords2012.csv","CollisionRecords2011.csv","CollisionRecords2010.csv");
  echo "Starting CSV reader...\n";
  $options = getopt("r");
  if (isset($options["r"]))
  {
    $geocode = false;
-   echo "Geocoding turned on...\n";
+   echo "Geocoding turned off...\n";
  }
  else
  {
    $geocode = true;
-   echo "Geocoding turned off...\n";
+   echo "Geocoding turned on...\n";
  }
  echo "Reading in raw data\n";
- $s_contents = file('CollisionRecords2012.csv');
- $field_list = readHeader($s_contents[0]);
- //print_r($field_list);
- //$records = readRecord($field_list,$s_contents);
- echo "Producing geocoded results in json\n";
- $necessary = getNecessary($field_list,$s_contents,0,$geocode);
+ foreach ($files as $filename)
+ {
+   echo "  Reading ".$filename."....\n";
+   $s_contents = file($filename);
+   echo "  ".count($s_contents)." Records for ".$filename."\n";
+   $field_list = readHeader($s_contents[0]);
+   print_r($field_list);
+   //$records = readRecord($field_list,$s_contents);
+   echo "Producing necessary data records...\n";
+   $necessary = array_merge($necessary,getNecessary($field_list,$s_contents,0,$geocode));
+ }
  echo count($necessary)." records produced\n";
  print_to_file($necessary);
 }
