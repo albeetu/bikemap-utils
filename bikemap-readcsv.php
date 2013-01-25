@@ -43,6 +43,31 @@ function readHeader($header){
   
 }
 
+/*
+
+try
+{
+  if ($http_code != '200')
+  {
+    throw new Exception('HTTP repsonse failed for XXXXX');
+  }
+  // http_code == 200
+  // Process response
+}
+catch (Exception $e)
+{
+  echo "Exceptions at $i";
+}
+
+*/
+/*
+
+send curl request
+
+
+*/
+
+
 function geocode($id, $case_id, $street, $crosstreet, $offset){
   $ch = curl_init();
 
@@ -84,6 +109,7 @@ function geocode($id, $case_id, $street, $crosstreet, $offset){
     }
    }
   else
+  // HTTP response is not 200
   {
      echo $http_code." -> ".$id."\n";
      $retString = "0,0";
@@ -115,7 +141,7 @@ function readRecord($list,$contents){
 function getNecessary($list,$contents,$limit,$geocode){
   
   //$selection = Array(0,4,5,18,19,20,21,23,36,37,38,42,43,44,45,46,47,49,54,66,68);
-  $selection = Array(0,18,19,20,21);
+  $selection = Array(0,18,19,20,21,47);
   $records = Array();
   $record_count = 0;
   if ($limit){ 
@@ -154,16 +180,18 @@ function getNecessary($list,$contents,$limit,$geocode){
     }
     $data_record["bikemap_id"] = $i;
     $data_record["distance"] = $data_record["distance"] / 3.28084; // change feet to meters
-    $records[$record_count] = $data_record;
-    $record_count++;
+    if ($data_record["mviw"] == 'G')
+    {  
+      $records[$record_count] = $data_record;
+      $record_count++;
+    }
   }
   return $records;
-
 }
 
 function print_to_file($records)
 {
-  $myFile = "bikemap.raw";
+  $myFile = "./data/bikemap.raw";
   $fh = fopen($myFile,'w') or die ("can't open file");
   fwrite($fh,json_encode($records));
   fclose($fh);
@@ -188,10 +216,10 @@ function main(){
  foreach ($files as $filename)
  {
    echo "  Reading ".$filename."....\n";
-   $s_contents = file($filename);
+   $s_contents = file("./bikedata/".$filename);
    echo "  ".count($s_contents)." Records for ".$filename."\n";
    $field_list = readHeader($s_contents[0]);
-   print_r($field_list);
+   //print_r($field_list);
    //$records = readRecord($field_list,$s_contents);
    echo "Producing necessary data records...\n";
    $necessary = array_merge($necessary,getNecessary($field_list,$s_contents,0,$geocode));
