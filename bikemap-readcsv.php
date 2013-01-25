@@ -25,8 +25,15 @@
 
 */
 
+/*
+Options
+-r Just read in csv files and create json records, no geocoding
 
-function debugPrint($what_to_print);
+*/
+
+
+
+function debugPrint($what_to_print)
 {
 }
 
@@ -48,36 +55,41 @@ function geocode($id, $case_id, $street, $crosstreet, $offset){
   $output  = curl_exec($ch);
   $http_code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
   // close cURL resource, and free up system resources
-  echo "HTTP code -> ". $http_code ." for ID :: ".$id. ", ".$case_id."\n";
+  // echo "HTTP code -> ". $http_code ." for ID :: ".$id. ", ".$case_id."\n";
   if ($http_code == '200')
   {
     $feed = json_decode( $output, true);
     //print_r($feed);
+    // Check API status code
     if ($feed['status'] == "OK")
     {
+      // check to see if location is valid.
       if (isset($feed['results']['0']['geometry']['location']))
       {
         $retString = $feed['results'][0]['geometry']['location']['lat'] . ',' . $feed['results'][0]['geometry']['location']['lng'];
+        $retString = explode(",",$retString);
       }
       else
       {
         echo "   Empty coordinate set for ID :: ".$id.", ".$case_id."\n";
-        $retString = "0,0";
+        // place case_id into blacklist???
+        $retString = false;
       }
     }
     else
     {
-      // status is not OK
+      // map status is not OK
       echo "   Geocode response not OK -> ". $feed['status'] ."\n";
-      $retString = "0,0";
+      $retString = false;
     }
    }
   else
   {
      echo $http_code." -> ".$id."\n";
+     $retString = "0,0";
   }
   curl_close($ch);
-  return explode(",",$retString);
+  return $retString;
 }
 
 function readRecord($list,$contents){
@@ -100,8 +112,7 @@ function readRecord($list,$contents){
   return $records;
 }
 
-function getNecessary($list,$contents,$limit){
-
+function getNecessary($list,$contents,$limit,$geocode){
   
   //$selection = Array(0,4,5,18,19,20,21,23,36,37,38,42,43,44,45,46,47,49,54,66,68);
   $selection = Array(0,18,19,20,21);
@@ -114,6 +125,7 @@ function getNecessary($list,$contents,$limit){
   {
     $records_needed = count($contents) - 1;
   }
+  // Start at [1] to skip header
   for ($i=1; $i<=$records_needed; $i++)
   {
     $record = explode(',',$contents[$i]);
@@ -121,11 +133,26 @@ function getNecessary($list,$contents,$limit){
     {
         $data_record[$list[$index]] = trim($record[$index],'"\n');
     }
-    $coords = geocode($i,$data_record["case_id"],$data_record["primary_rd"],$data_record["secondary_rd"],0);
-    usleep(50000);
+    if ($geocode)
+    {
+      $coords = geocode($i,$data_record["case_id"],$data_record["primary_rd"],$data_record["secondary_rd"],0);
+      usleep(50000);
+      if ($coords)
+      {
+        $data_record["lat"] = $coords[0];
+        $data_record["long"] = $coords[1];
+      }
+      else
+      {
+        $data_record["lat"] = 0;
+        $data_record["long"] = 0;
+      }
+    }
+    else
+    {
+      $coords = false;
+    }
     $data_record["bikemap_id"] = $i;
-    $data_record["lat"] = $coords[0];
-    $data_record["long"] = $coords[1];
     $data_record["distance"] = $data_record["distance"] / 3.28084; // change feet to meters
     $records[$record_count] = $data_record;
     $record_count++;
@@ -143,13 +170,25 @@ function print_to_file($records)
 }
 
 function main(){
+ echo "Starting CSV reader...\n";
+ $options = getopt("r");
+ if (isset($options["r"]))
+ {
+   $geocode = false;
+   echo "Geocoding turned on...\n";
+ }
+ else
+ {
+   $geocode = true;
+   echo "Geocoding turned off...\n";
+ }
  echo "Reading in raw data\n";
  $s_contents = file('CollisionRecords2012.csv');
  $field_list = readHeader($s_contents[0]);
  //print_r($field_list);
- $records = readRecord($field_list,$s_contents);
+ //$records = readRecord($field_list,$s_contents);
  echo "Producing geocoded results in json\n";
- $necessary = getNecessary($field_list,$s_contents,5);
+ $necessary = getNecessary($field_list,$s_contents,0,$geocode);
  echo count($necessary)." records produced\n";
  print_to_file($necessary);
 }
