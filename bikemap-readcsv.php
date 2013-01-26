@@ -140,8 +140,8 @@ function readRecord($list,$contents){
 
 function getNecessary($list,$contents,$limit,$geocode){
   
-  //$selection = Array(0,4,5,18,19,20,21,23,36,37,38,42,43,44,45,46,47,49,54,66,68);
-  $selection = Array(0,18,19,20,21,47);
+  $selection = Array(0,4,5,18,19,20,21,23,36,37,38,42,43,44,45,46,47,49,54,66,68);
+  //$selection = Array(0,18,19,20,21,47);
   $records = Array();
   $record_count = 0;
   if ($limit){ 
