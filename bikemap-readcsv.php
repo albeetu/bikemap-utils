@@ -209,8 +209,8 @@ function main(){
  }
  else
  {
-   $geocode = true;
-   echo "Geocoding turned on...\n";
+   $geocode = false;
+   echo "Geocoding turned off...\n";
  }
  echo "Reading in raw data\n";
  foreach ($files as $filename)
